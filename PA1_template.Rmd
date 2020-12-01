@@ -45,7 +45,7 @@ activity_data_by_day <- activity_data %>%
 
 Let's look at a histogram of the number of steps per day:
 
-```{r histogram}
+```{r histogram1}
 with(activity_data_by_day,hist(total_steps,
                                main="Histogram Of Total Steps On Each Date",
                                xlab="Total Number of Steps in a Day"))
@@ -70,7 +70,7 @@ activity_data_by_interval <- activity_data %>%
  
 Now plot:
 
-```{r time series plot}
+```{r time_series_plot1}
 with(activity_data_by_interval,plot(interval,
                                     average_steps,
                                     type="l",
@@ -129,7 +129,7 @@ activity_data_by_day_impute <- activity_data %>%
 
 Then we create the histogram.
 
-```{r histogram impute}
+```{r histogram2}
 with(activity_data_by_day_impute,hist(total_steps_impute,
                                main="Histogram Of Total Steps On Each Date (with Imputations)",
                                xlab="Total Number of Steps in a Day"))
@@ -169,7 +169,7 @@ activity_data_by_interval_impute <- activity_data %>%
  
 Now plot:
 
-```{r time series panel plot}
+```{r time_series_plot2}
 xyplot(average_steps_impute ~ interval | day_type,
        data=activity_data_by_interval_impute,
        type="l",

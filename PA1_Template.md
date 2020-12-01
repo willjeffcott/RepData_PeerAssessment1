@@ -55,7 +55,7 @@ with(activity_data_by_day,hist(total_steps,
                                xlab="Total Number of Steps in a Day"))
 ```
 
-![](PA1_Template_files/figure-html/histogram-1.png)<!-- -->
+![](PA1_Template_files/figure-html/histogram1-1.png)<!-- -->
 
 The mean and median values can be obtained using the following code:
 
@@ -93,7 +93,7 @@ with(activity_data_by_interval,plot(interval,
                                     ylab="Mean Number of Steps"))
 ```
 
-![](PA1_Template_files/figure-html/time series plot-1.png)<!-- -->
+![](PA1_Template_files/figure-html/time_series_plot1-1.png)<!-- -->
 
 The time interval at which the maximum occurs can be found using the code:
 
@@ -165,7 +165,7 @@ with(activity_data_by_day_impute,hist(total_steps_impute,
                                xlab="Total Number of Steps in a Day"))
 ```
 
-![](PA1_Template_files/figure-html/histogram impute-1.png)<!-- -->
+![](PA1_Template_files/figure-html/histogram2-1.png)<!-- -->
 
 The new mean and median values can be obtained using the following code:
 
@@ -219,6 +219,6 @@ xyplot(average_steps_impute ~ interval | day_type,
        xlab="Time Interval",ylab="Mean Number of Steps")
 ```
 
-![](PA1_Template_files/figure-html/time series panel plot-1.png)<!-- -->
+![](PA1_Template_files/figure-html/time_series_plot2-1.png)<!-- -->
 
 Mean steps have a higher early peak in the Weekdays data, but at intervals >1000 the mean number of steps are generally lower than on the weekends.
