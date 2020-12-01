@@ -5,28 +5,30 @@ output:
     keep_md: true
 ---
 
-```{r knitrimport,include=FALSE}
-library(knitr)
-library(lubridate)
-library(dplyr)
-library(lattice)
-```
 
-```{r setoptions,echo=FALSE}
-opts_chunk$set(echo=TRUE)
-```
+
+
 
 ## Loading and preprocessing the data
 
 First we must read in the activity data, printing the structure of the data set to get a feel for the variables we will use:
-```{r dataread}
+
+```r
 activity_data <- read.csv('activity_data.csv')
 str(activity_data)
 ```
 
+```
+## 'data.frame':	17568 obs. of  3 variables:
+##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ date    : Factor w/ 61 levels "2012-10-01","2012-10-02",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: int  0 5 10 15 20 25 30 35 40 45 ...
+```
+
 Currently the date variable is in a factor format, so it would be useful to convert it into a date-time format. This is performed using the lubridate package as follows:
 
-```{r dataprocess}
+
+```r
 activity_data$date <- ymd(activity_data$date)
 ```
 
@@ -36,7 +38,8 @@ The dataset contains three variables. Namely steps, date and interval. The **ste
 
 We may wish to look at a number of statistics regarding the total number of steps per day. To do this we group the data set by date and sum the steps variable (removing **NA** values), first converting to a tibble so we can use the dplyr package:
 
-```{r summarisebyday, message=FALSE}
+
+```r
 activity_data_by_day <- activity_data %>%
   as_tibble %>%
   group_by(date) %>%
@@ -45,23 +48,33 @@ activity_data_by_day <- activity_data %>%
 
 Let's look at a histogram of the number of steps per day:
 
-```{r histogram}
+
+```r
 with(activity_data_by_day,hist(total_steps,
                                main="Histogram Of Total Steps On Each Date",
                                xlab="Total Number of Steps in a Day"))
 ```
 
+![](PA1_Template_files/figure-html/histogram-1.png)<!-- -->
+
 The mean and median values can be obtained using the following code:
 
-```{r median and mean}
+
+```r
 summary(activity_data_by_day$total_steps)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##       0    6778   10395    9354   12811   21194
 ```
 
 ## What is the average daily activity pattern?
 
 Now let's look at a time series plot of the average number of steps (y-axis) across all the different specified intervals (x-axis). First we must summarize the activity data by interval:
 
-```{r summarise by interval,message=FALSE}
+
+```r
 activity_data_by_interval <- activity_data %>%
   as_tibble %>%
   group_by(interval) %>%
@@ -70,7 +83,8 @@ activity_data_by_interval <- activity_data %>%
  
 Now plot:
 
-```{r time series plot}
+
+```r
 with(activity_data_by_interval,plot(interval,
                                     average_steps,
                                     type="l",
@@ -79,24 +93,37 @@ with(activity_data_by_interval,plot(interval,
                                     ylab="Mean Number of Steps"))
 ```
 
+![](PA1_Template_files/figure-html/time series plot-1.png)<!-- -->
+
 The time interval at which the maximum occurs can be found using the code:
 
-```{r max interval}
+
+```r
 max_index <- with(activity_data_by_interval,which(average_steps==max(average_steps)))
 activity_data_by_interval$interval[max_index]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 Let's revert back to the original data set, **activity_data**. The data set has a total of
 
-```{r Number of NAs}
+
+```r
 sum(!complete.cases(activity_data))
+```
+
+```
+## [1] 2304
 ```
 
 rows with at least one NA value. These NA values occur entirely in the steps column. We wish to impute values instead of the NA values. For this we will take the median value for the interval in which the NA occurs. Let's create a dataset with the median for each interval (without the NAs)
 
-```{r interval medians, message=FALSE}
+
+```r
 activity_data_median_impute <- activity_data %>%
   as_tibble %>%
   group_by(interval) %>%
@@ -105,7 +132,8 @@ activity_data_median_impute <- activity_data %>%
 
 We impute over the NAs by defining a function which takes the NA entry and maps to the appropriate interval median.
 
-```{r impute medians}
+
+```r
 impute <- function(x,intvl){
   if(is.na(x)){
     return(activity_data_median_impute$median_steps[activity_data_median_impute$interval==intvl])
@@ -120,7 +148,8 @@ activity_data$steps_impute <- mapply(impute,activity_data$steps,activity_data$in
 
 Now let's look at a histogram of the total number of steps taken each day again, but this time with the imputed values. To do this we must create a summed dataset, grouped by day.
 
-```{r summarisebyday impute, message=FALSE}
+
+```r
 activity_data_by_day_impute <- activity_data %>%
   as_tibble %>%
   group_by(date) %>%
@@ -129,16 +158,25 @@ activity_data_by_day_impute <- activity_data %>%
 
 Then we create the histogram.
 
-```{r histogram impute}
+
+```r
 with(activity_data_by_day_impute,hist(total_steps_impute,
                                main="Histogram Of Total Steps On Each Date (with Imputations)",
                                xlab="Total Number of Steps in a Day"))
 ```
 
+![](PA1_Template_files/figure-html/histogram impute-1.png)<!-- -->
+
 The new mean and median values can be obtained using the following code:
 
-```{r median and mean impute}
+
+```r
 summary(activity_data_by_day_impute$total_steps_impute)
+```
+
+```
+##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##      41    6778   10395    9504   12811   21194
 ```
 
 The new median does not differ from the estimate with the NAs removed, however the mean has increased from 9354 to 9504.
@@ -147,7 +185,8 @@ The new median does not differ from the estimate with the NAs removed, however t
 
 We now wish to differentiate between activity patterns on weekdays and weekends. We must first add a new column to our data set which outlines whether a particular row is a weekday or a weekend. We make use of the weekdays function as follows:
 
-```{r weekdays or weekend}
+
+```r
 weekday_vector <- weekdays(activity_data$date)
 
 #sapply to every element of weekday_vector to decide whether it's a weekday or weekend
@@ -160,7 +199,8 @@ activity_data$day_type <- factor(weekend_weekday)
 
 Now let's create a time series plot similar to the last one, but split into data from weekends vs weekdays. First we must group by day_type and interval and calculate the mean number of steps.
 
-```{r summarise by interval 2,message=FALSE}
+
+```r
 activity_data_by_interval_impute <- activity_data %>%
   as_tibble %>%
   group_by(day_type,interval) %>%
@@ -169,7 +209,8 @@ activity_data_by_interval_impute <- activity_data %>%
  
 Now plot:
 
-```{r time series panel plot}
+
+```r
 xyplot(average_steps_impute ~ interval | day_type,
        data=activity_data_by_interval_impute,
        type="l",
@@ -177,5 +218,7 @@ xyplot(average_steps_impute ~ interval | day_type,
        main="Average Number of Steps by Time Interval (Weekend vs Weekday)",
        xlab="Time Interval",ylab="Mean Number of Steps")
 ```
+
+![](PA1_Template_files/figure-html/time series panel plot-1.png)<!-- -->
 
 Mean steps have a higher early peak in the Weekdays data, but at intervals >1000 the mean number of steps are generally lower than on the weekends.
